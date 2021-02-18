@@ -35,7 +35,7 @@ class AdminController extends GoController
                     $model->updated_on = date('Y-m-d h:i:s A');            
                     if($model->validate()){
                         $user_array = ['user_mobile' => $schools_arr['mobile'] ,'user_email' => $schools_arr['email'],
-                        'first_name' =>  $schools_arr['school_name']
+                        'first_name' =>  $schools_arr['school_name'],'school_id' => $model->getPrimaryKey()
                         ];
                         Yii::$app->school->userCreation($user_array);
                         $model->save();

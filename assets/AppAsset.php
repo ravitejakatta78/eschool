@@ -26,6 +26,7 @@ class AppAsset extends AssetBundle
         'css/argon.css?v=1.2.0',
         'css/dataTables.bootstrap4.min.css',
         'css/buttons.bootstrap4.min.css',
+        'cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.css',
 		'css/custom.css',
     ];
     public $js = [
@@ -45,6 +46,7 @@ class AppAsset extends AssetBundle
         'js/buttons.html5.min.js',
         'js/buttons.print.min.js',
         //'js/argon.js?v=1.2.0',
+        'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js',
 		'js/script.js',
 	];
     public $depends = [

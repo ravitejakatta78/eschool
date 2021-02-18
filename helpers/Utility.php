@@ -1,7 +1,9 @@
 <?php
-namespace app\helpers;
 
+namespace app\helpers;
+ 
 use yii;
+use app\helpers\MyConst;
 
 class Utility{
     public static function tableUniqueId($tablename,$text)
@@ -15,6 +17,22 @@ class Utility{
 	    $newid = 1;
         }
         return $text.sprintf('%04d',$newid);
-    }	
+    }
+    /*
+    * @param date 
+    * @return date with changed date format d-M-Y
+    */
+    public function	format_date($date,$type = MyConst::_D_M_Y)
+    {
+        if($type == MyConst::_D_M_Y) {
+            return date('d-M-Y',strtotime($date));
+        }
+        else if($type == MyConst::_Y_M_D) {
+            return date('Y-m-d',strtotime($date));
+        }
+        else if($type == _Y_M_D_H){
+            return date('Y-m-d h:i:s A',strtotime($date));
+        }
+    }
 }
 ?>

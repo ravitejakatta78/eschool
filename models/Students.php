@@ -15,11 +15,12 @@ use Yii;
  * @property string|null $last_name
  * @property int $gender
  * @property string $dob
+ * @property string $address
  * @property string|null $roll_number
  * @property string|null $blood_group
  * @property int|null $religion
- * @property string $student_class
- * @property string $student_section
+ * @property int $student_class
+ * @property int|null $student_section
  * @property string $admission_id
  * @property string|null $student_img
  * @property int|null $parent_id
@@ -45,12 +46,13 @@ class Students extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['school_id', 'role_id', 'status', 'first_name', 'gender', 'dob', 'student_class', 'student_section', 'admission_id', 'reg_date'], 'required'],
-            [['school_id', 'role_id', 'status', 'gender', 'religion', 'parent_id'], 'integer'],
+            [['school_id', 'role_id', 'status', 'first_name', 'gender', 'dob', 'address', 'student_class', 'admission_id', 'reg_date'], 'required'],
+            [['school_id', 'role_id', 'status', 'gender', 'religion', 'student_class', 'student_section', 'parent_id'], 'integer'],
             [['dob', 'created_on', 'updated_on', 'reg_date'], 'safe'],
+            [['address'], 'string'],
             [['first_name', 'last_name', 'student_img'], 'string', 'max' => 255],
             [['roll_number', 'created_by', 'updated_by'], 'string', 'max' => 100],
-            [['blood_group', 'student_class', 'student_section', 'admission_id'], 'string', 'max' => 50],
+            [['blood_group', 'admission_id'], 'string', 'max' => 50],
         ];
     }
 
@@ -68,6 +70,7 @@ class Students extends \yii\db\ActiveRecord
             'last_name' => 'Last Name',
             'gender' => 'Gender',
             'dob' => 'Dob',
+            'address' => 'Address',
             'roll_number' => 'Roll Number',
             'blood_group' => 'Blood Group',
             'religion' => 'Religion',

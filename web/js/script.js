@@ -9,6 +9,12 @@ $(document).ready(function() {
 	$(".sidebarclose").click(function() {
 	 $('.wrapper.open-sidebar').removeClass("open-sidebar");
 	});
+
+	$('.dateselect').datepicker({
+		format: 'dd-M-yyyy',
+		autoclose: true,
+		// startDate: '-3d'
+	});
 	   
   });
    

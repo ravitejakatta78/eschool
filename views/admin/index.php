@@ -693,8 +693,7 @@
         </div>
 		
 		<!-- The Modal -->
-<div class="modal fade
-" id="new">
+<div class="modal fade" id="new">
   <div class="modal-dialog">
     <div class="modal-content">
 

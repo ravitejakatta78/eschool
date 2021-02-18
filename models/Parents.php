@@ -8,7 +8,6 @@ use Yii;
  * This is the model class for table "parents".
  *
  * @property int $id
- * @property string $student_id
  * @property string $parent_name
  * @property int $parent_type
  * @property string $occupation
@@ -37,9 +36,8 @@ class Parents extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'student_id', 'parent_name', 'parent_type', 'occupation', 'status', 'reg_date'], 'required'],
-            [['id', 'parent_type', 'status'], 'integer'],
-            [['student_id'], 'string'],
+            [['parent_name', 'parent_type', 'occupation', 'status', 'reg_date'], 'required'],
+            [['parent_type', 'status'], 'integer'],
             [['created_on', 'updated_on', 'reg_date'], 'safe'],
             [['parent_name', 'occupation', 'email'], 'string', 'max' => 255],
             [['phone'], 'string', 'max' => 50],
@@ -54,7 +52,6 @@ class Parents extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'student_id' => 'Student ID',
             'parent_name' => 'Parent Name',
             'parent_type' => 'Parent Type',
             'occupation' => 'Occupation',
