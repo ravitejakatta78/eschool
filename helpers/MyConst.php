@@ -34,7 +34,8 @@ class MyConst
 	const _Y_M_D = 2;
 	const _Y_M_D_H = 3; 
 
-	
+	//fee duration dates
+	const _FEE_DURATION = ['1' => 'Monthly','3' => 'Quarterly','4' => '3 Terms' , '6' => 'Half Yearly' ,'12' => 'Yearly'];	
 
 }
 

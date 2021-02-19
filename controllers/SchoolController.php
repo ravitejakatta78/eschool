@@ -11,6 +11,7 @@ use \app\models\Faculity;
 use \app\models\Classes;
 use \app\models\Exams;
 use \app\models\ExamDetails;
+use \app\models\SchoolFee;
 
 class SchoolController extends GoController
 {
@@ -711,4 +712,72 @@ class SchoolController extends GoController
         return $this->renderAjax('viewMarks',['marks'=>$marksArr,'subjects'=>$subjects,'students'=>$students, 'examModel'=>$examModel]);   
     }
 
+    public function actionClasswisefee()
+    {
+        $feeModel = new SchoolFee;
+        $sql_fee_list = 'select class_name,sf.* from school_fee sf
+        inner join classes c on c.id = sf.class_id
+        where fee_status = \''.MyConst::_ACTIVE.'\' and sf.school_id = \''.Yii::$app->user->identity->school_id.'\'';
+        $fee_list = Yii::$app->db->createCommand($sql_fee_list)->queryAll();
+        $connection = \Yii::$app->db;	
+		$transaction = $connection->beginTransaction();
+        try {
+            if ($feeModel->load(Yii::$app->request->post()) ) {
+                $feeModel->school_id = Yii::$app->user->identity->school_id;
+                $feeModel->fee_status = MyConst::_ACTIVE;
+                $feeModel->created_by = Yii::$app->user->identity->first_name;
+                $feeModel->created_on = date('Y-m-d h:i:s A');
+                $feeModel->updated_by = Yii::$app->user->identity->first_name;
+                $feeModel->updated_on = date('Y-m-d h:i:s A');
+
+                if ($feeModel->validate()) {
+                    Yii::$app->getSession()->setFlash('success', [
+                        'title' => 'Fee',
+                        'text' => 'Fee Created Successfully',
+                        'type' => 'success',
+                        'timer' => 3000,
+                        'showConfirmButton' => false
+                    ]);
+                    $feeModel->save();
+                    $transaction->commit();
+                    return	$this->redirect('classwisefee');
+                }
+            }    
+        }
+        catch(Exception $e) {
+            $transaction->rollback();
+        }    
+        return $this->render('classwisefee',['feeModel' => $feeModel, 'fee_list' => $fee_list]);
+    }
+    public function actionEditfeepopup()
+    {
+        extract($_POST);
+        $feeModel = SchoolFee::findOne($id);
+        return $this->renderAjax('editfee', ['feeModel' => $feeModel]);   
+
+    }
+    public function actionEditfee()
+    {
+            $model = new SchoolFee;
+            if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ActiveForm::validate($model);
+            }
+            $fee_arr = Yii::$app->request->post('SchoolFee');
+            $fee_update = SchoolFee::findOne($_POST['SchoolFee']['id']);
+            $fee_update->attributes = \Yii::$app->request->post('SchoolFee');
+            $fee_update->updated_by = Yii::$app->user->identity->first_name;
+            $fee_update->updated_on = date('Y-m-d h:i:s A');   
+            if($fee_update->validate()){
+                $fee_update->save();
+                Yii::$app->getSession()->setFlash('success', [
+            'title' => 'Fee',
+            'text' => 'Fee Updated Successfully',
+            'type' => 'success',
+            'timer' => 3000,
+            'showConfirmButton' => false
+        ]);
+            }
+                return $this->redirect('classwisefee');
+    }
 }
