@@ -17,6 +17,7 @@ use Yii;
  * @property string|null $created_by
  * @property string|null $updated_on
  * @property string|null $updated_by
+ * @property int $marks_status
  */
 class Exams extends \yii\db\ActiveRecord
 {
@@ -35,7 +36,7 @@ class Exams extends \yii\db\ActiveRecord
     {
         return [
             [['exam_name', 'exam_start_date', 'exam_end_date', 'school_id', 'class_id'], 'required'],
-            [['exam_start_date', 'exam_end_date', 'created_on', 'updated_on'], 'safe'],
+            [['exam_start_date', 'exam_end_date', 'created_on', 'updated_on','marks_status'], 'safe'],
             [['school_id', 'class_id'], 'integer'],
             [['exam_name', 'created_by', 'updated_by'], 'string', 'max' => 100],
         ];
@@ -57,6 +58,7 @@ class Exams extends \yii\db\ActiveRecord
             'created_by' => 'Created By',
             'updated_on' => 'Updated On',
             'updated_by' => 'Updated By',
+            'marks_status' => 'Marks Status',
         ];
     }
 }

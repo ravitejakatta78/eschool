@@ -56,7 +56,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
                     <th scope="col" class="sort" data-sort="name">Exam Start Date</th>
                     <th scope="col" class="sort" data-sort="name">Exam End Date</th>
                     <th scope="col" class="sort" data-sort="completion">Action</th>
-
+					<th>Marks</th>
                 </tr>
                 </thead>
                 <tbody class="list">
@@ -73,8 +73,16 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
                     <a onclick="editexampopup('<?= $exams_list[$i]['id'];?>')">
                       <span class="fa fa-pencil"></span>
                       </a> 
-                    <a href="">Update Marks</a>
+                    
                     	</td>
+						<td>
+                            <?php if($exams_list[$i]['marks_status'] == '2'){ ?>
+                               <a onclick="viewMarks('<?= $exams_list[$i]['id'];?>')"><span class="fa fa-eye"></span></a> 
+                            <?php } else { ?>
+                                <a class="btn btn-primary" style="color:white" onclick="submitMarks('<?= $exams_list[$i]['id'];?>')">Submit Marks</a>
+                            <?php } ?>
+                        </td>
+						
                 </tr>
                 <?php } ?>
                 </tbody>
@@ -224,6 +232,19 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
   	</div>
 	</div>
 </div>
+<!--marks popup-->
+<div id="viewmarks" class="modal fade" role="dialog">
+   <div class="modal-dialog modal-lg" >
+        <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Marks List</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+	    <div  id="viewmarksbody" class="modal-body">
+  		</div>
+	</div>
+</div>
 <script>
 
     $(document).ready(function() {
@@ -259,6 +280,32 @@ var request = $.ajax({
 	$('#editexambody').html(msg);
 	$('#editexam').modal('show');
 });		
+}
+function viewMarks(id){
+    var request = $.ajax({
+  url: "viewmarks",
+  type: "POST",
+  data: {id : id},
+}).done(function(msg) {
+	$('#viewmarksbody').html(msg);
+	$('#viewmarks').modal('show');
+});
+}
+function submitMarks(id){
+    
+    var form = document.createElement("form");
+    form.setAttribute("method", "post");
+    form.setAttribute("target", "_blank");
+    form.setAttribute("action", "submitmarks");
+    
+    var hiddenField = document.createElement("input");
+    hiddenField.setAttribute("type", "hidden");
+    hiddenField.setAttribute("name", "id");
+    hiddenField.setAttribute("value", id);
+    form.appendChild(hiddenField);
+    
+    document.body.appendChild(form);
+    form.submit();
 }
 
 $( "#save" ).click(function() {

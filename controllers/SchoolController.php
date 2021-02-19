@@ -12,7 +12,7 @@ use \app\models\Classes;
 use \app\models\Exams;
 use \app\models\ExamDetails;
 
-class SchoolController extends \yii\web\Controller
+class SchoolController extends GoController
 {
     public function actionIndex()
     {
@@ -411,7 +411,7 @@ class SchoolController extends \yii\web\Controller
     {
         extract($_POST);
         $examsModel = new Exams;
-        $sql_exams_list = 'select e.id,c.class_name,e.exam_name,e.exam_start_date,e.exam_end_date from exams e inner join classes c on e.class_id = c.id where 
+        $sql_exams_list = 'select e.id,c.class_name,e.exam_name,e.exam_start_date,e.exam_end_date,e.marks_status from exams e inner join classes c on e.class_id = c.id where 
         e.school_id = \''.Yii::$app->user->identity->school_id.'\'';
         $exams_list = Yii::$app->db->createCommand($sql_exams_list)->queryAll();
         $subject_list = Subjects::find()
@@ -433,7 +433,7 @@ class SchoolController extends \yii\web\Controller
                 $examsModel->created_on = date('Y-m-d h:i:s A');
                 $examsModel->updated_by = Yii::$app->user->identity->first_name;
                 $examsModel->updated_on = date('Y-m-d h:i:s A');
-
+				$examsModel->marks_status = 0;
                 if($examsModel->validate()){
                     $examsModel->save();
                     $subject_name = array_filter($subject_name);
@@ -611,6 +611,104 @@ class SchoolController extends \yii\web\Controller
 			echo "<option value=''>Select</option>";
 		}
 		
+    }
+	public function actionSubmitmarks()
+    {	
+        extract($_POST);
+        $examModel = Exams::findOne($id);
+        //Exam and subject details
+        $sqlSubjects = 'select sub.*,e.id as exam_id from exams e
+                inner join exam_details ed on ed.exam_id = e.id
+                inner join subjects sub on sub.id=ed.subject_id 
+                where e.id=\''.$id.'\'
+                and e.school_id = \''.Yii::$app->user->identity->school_id.'\'';
+        $subjects = Yii::$app->db->createCommand($sqlSubjects)->queryAll();
+        //students 
+        $sqlstudents = 'select s.*  from exams e
+                inner join students s on s.student_class=e.class_id
+				where e.id=\''.$id.'\'';
+        $students = Yii::$app->db->createCommand($sqlstudents)->queryAll();
+        //Marks
+        $marks = [];
+        $sqlmarks = 'select * from marks
+                  where exam_id=\''.$id.'\' and school_id=\''.Yii::$app->user->identity->school_id.'\'';
+        $marks = Yii::$app->db->createCommand($sqlmarks)->queryAll();
+        $marksArr = (Yii\helpers\ArrayHelper::index($marks,null, 'student_id'));       
+    //        $marksArr = array_column($marks,'marks','student_id');
+        return $this->render('marks',['marks'=>$marksArr,'subjects'=>$subjects,'students'=>$students, 'examModel'=>$examModel]);
+    }
+    public function actionUpdatemarks(){
+        extract($_POST);
+        $marks_status = 0;
+        if(isset($save)){
+            $marks_status=1;
+        } else if(isset($closeExam)){
+            $marks_status=2;
+        }
+        $sqlSubjects = 'select ed.subject_id from exams e
+                inner join exam_details ed on ed.exam_id = e.id
+                where e.id=\''.$exam_id.'\'
+                and e.school_id = \''.Yii::$app->user->identity->school_id.'\'';
+        $subjects = Yii::$app->db->createCommand($sqlSubjects)->queryAll();
+        $subjectIdArr = array_column($subjects,'subject_id');
+        
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            for($i=0; $i<count($student_id); $i++){
+                for($j=0; $j<count($subjectIdArr); $j++){
+                    $data[]= [$exam_id, $student_id[$i],$subjectIdArr[$j] ,
+                    $_POST['subject_'.$subjectIdArr[$j]][$i], Yii::$app->user->identity->school_id,
+                    date('Y-m-d h:i:s A'), Yii::$app->user->identity->first_name
+                    ,date('Y-m-d h:i:s A'),Yii::$app->user->identity->first_name];
+                }
+            }
+            //Marks update
+            Yii::$app->db
+                ->createCommand()
+                ->batchInsert('marks', ['exam_id','student_id','subject_id','marks','school_id'
+                , 'created_on', 'created_by', 'updated_on', 'updated_by'],$data)
+                ->execute();	
+            //Exam marks status update
+            $sqlUpdate = 'update exams set marks_status = \''.$marks_status.'\', 
+                      updated_by = \''.Yii::$app->user->identity->first_name.'\',
+	              updated_on = \''.date('Y-m-d H:i:s').'\'
+                      where ID = \''.$exam_id.'\'';
+            $resUpdate = Yii::$app->db->createCommand($sqlUpdate)->execute();
+            Yii::$app->getSession()->setFlash('success', [
+                'title' => 'Marks',
+                'text' => 'Marks Updated Successfully',
+                'type' => 'success',
+                'timer' => 3000,
+                'showConfirmButton' => false
+            ]);
+            $transaction->commit();
+            return $this->redirect('exams');
+        } catch(Exception $e) {
+            $transaction->rollback();
+        }
+    }
+    public function actionViewmarks()
+    {
+        extract($_POST);
+        $examModel = Exams::findOne($id);
+        //Exam and subject details
+        $sqlSubjects = 'select sub.*,e.id as exam_id from exams e
+                inner join exam_details ed on ed.exam_id = e.id
+                inner join subjects sub on sub.id=ed.subject_id 
+                where e.id=\''.$id.'\'
+                and e.school_id = \''.Yii::$app->user->identity->school_id.'\'';
+        $subjects = Yii::$app->db->createCommand($sqlSubjects)->queryAll();
+        //students 
+        $sqlstudents = 'select s.*  from exams e
+                inner join students s on s.student_class=e.class_id where e.id=\''.$id.'\'';
+        $students = Yii::$app->db->createCommand($sqlstudents)->queryAll();
+        //Marks
+        $marks = [];
+        $sqlmarks = 'select * from marks
+                  where exam_id=\''.$id.'\' and school_id=\''.Yii::$app->user->identity->school_id.'\'';
+        $marks = Yii::$app->db->createCommand($sqlmarks)->queryAll();
+        $marksArr = (Yii\helpers\ArrayHelper::index($marks,null, 'student_id'));       
+        return $this->renderAjax('viewMarks',['marks'=>$marksArr,'subjects'=>$subjects,'students'=>$students, 'examModel'=>$examModel]);   
     }
 
 }
