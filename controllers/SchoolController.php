@@ -780,4 +780,14 @@ class SchoolController extends GoController
             }
                 return $this->redirect('classwisefee');
     }
+    public function actionMainattendance()
+    {
+        $class_list = Classes::find()
+        ->where(['status' => MyConst::_ACTIVE,'school_id' => Yii::$app->user->identity->school_id])
+        ->orderBy([
+            'id'=>SORT_DESC
+        ])
+        ->asArray()->all();
+        return $this->render('mainattendance', ['class_list' => $class_list]);
+    }
 }

@@ -77,9 +77,9 @@ use yii\helpers\Url;
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="examples/upgrade.html">
+              <a class="nav-link" href="<?= Url::to(['school/mainattendance']); ?>">
                 <i class="ni ni-send text-dark"></i>
-                <span class="nav-link-text">Attendamce</span>
+                <span class="nav-link-text">Attendance</span>
               </a>
             </li>
             <li class="nav-item">
@@ -88,6 +88,12 @@ use yii\helpers\Url;
                 <span class="nav-link-text">Exam</span>
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="<?= Url::to(['school/classwisefee']); ?>">
+                <i class="ni ni-circle-08 text-pink"></i>
+                <span class="nav-link-text">Fee</span>
+              </a>
+            </li>            
 
           </ul>
           <!-- Divider -->
