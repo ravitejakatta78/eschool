@@ -790,4 +790,8 @@ class SchoolController extends GoController
         ->asArray()->all();
         return $this->render('mainattendance', ['class_list' => $class_list]);
     }
+    public function actionAdmindashboard()
+    {
+        return $this->render('admindashboard');
+    }
 }
