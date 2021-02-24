@@ -794,4 +794,41 @@ class SchoolController extends GoController
     {
         return $this->render('admindashboard');
     }
+    public function actionNoticeboard()
+    {
+        $noticeModel = new Noticeboard;
+        $sql_fee_list = 'select * from notice_board nb
+        where notice_status = \''.MyConst::_ACTIVE.'\' 
+        and school_id = \''.Yii::$app->user->identity->school_id.'\' order by crearted_on desc';
+        $fee_list = Yii::$app->db->createCommand($sql_fee_list)->queryAll();
+        $connection = \Yii::$app->db;	
+		$transaction = $connection->beginTransaction();
+        try {
+            if ($noticeModel->load(Yii::$app->request->post()) ) {
+                $noticeModel->school_id = Yii::$app->user->identity->school_id;
+                $noticeModel->notice_status = MyConst::_ACTIVE;
+                $noticeModel->created_by = Yii::$app->user->identity->first_name;
+                $noticeModel->created_on = date('Y-m-d h:i:s A');
+                $noticeModel->updated_by = Yii::$app->user->identity->first_name;
+                $noticeModel->updated_on = date('Y-m-d h:i:s A');
+
+                if ($noticeModel->validate()) {
+                    Yii::$app->getSession()->setFlash('success', [
+                        'title' => 'Notice',
+                        'text' => 'Notice Created Successfully',
+                        'type' => 'success',
+                        'timer' => 3000,
+                        'showConfirmButton' => false
+                    ]);
+                    $feeModel->save();
+                    $transaction->commit();
+                    return	$this->redirect('noticeboard');
+                }
+            }    
+        }
+        catch(Exception $e) {
+            $transaction->rollback();
+        }    
+        return $this->render('noticeboard',['noticeModel' => $noticeModel, 'notice_list' => $notice_list]);
+    }
 }
