@@ -49,6 +49,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
                     <th scope="col" class="sort" data-sort="namid">ID</th>
                     <th scope="col" class="sort" data-sort="name">Class Name</th>
                     <th scope="col" class="sort" data-sort="completion">Action</th>
+                    <th scope="col" class="sort" data-sort="completion">Attendance</th>
                 </tr>
                 </thead>
                 <tbody class="list">
@@ -59,7 +60,10 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
                     <td><?= ($i+1) ;?></td>
                     <td><?= $class_list[$i]['class_name'];?></td>
                     <td class="icons"><a onclick="editclasspopup('<?= $class_list[$i]['id'];?>')"><span class="fa fa-pencil"></span></a> 
-                    	</td>
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-primary" onclick="getClassAttendance('<?= $class_list[$i]['id']; ?>')" >Attendance</a>
+                    </td>
                 </tr>
                 <?php } ?>
                 </tbody>
@@ -70,3 +74,24 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
         </div>
       </div>
     </div>
+    <script>
+    $(document).ready(function() { 
+        
+    });
+    function getClassAttendance(id){
+        var form=document.createElement('form');
+        form.setAttribute('method','post');
+        form.setAttribute('action','classattendance');
+        form.setAttribute('target','_blank');
+
+        var hiddenField = document.createElement("input");
+        hiddenField.setAttribute("name", "id");
+        hiddenField.setAttribute("type", "hidden");
+        hiddenField.setAttribute("value", id);
+        form.appendChild(hiddenField);
+
+        document.body.appendChild(form);
+        form.submit();    
+
+    }
+    </script>

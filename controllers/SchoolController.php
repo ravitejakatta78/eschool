@@ -831,4 +831,10 @@ class SchoolController extends GoController
         }    
         return $this->render('noticeboard',['noticeModel' => $noticeModel, 'notice_list' => $notice_list]);
     }
+    public function actionClassattendance(){
+        extract($_POST);
+        $sql = 'select * from students where student_class=\''.$id.'\'';
+        $students = Yii::$app->db->createCommand($sql)->queryAll();
+        return $this->render('classAttendance',['students'=>$students]);
+    }
 }
