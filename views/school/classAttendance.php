@@ -15,14 +15,16 @@
     </div>
     <!-- Page content -->
     <!--1-->
+    <form method="post" action="saveattendance">
+        <input type="hidden" name="classid" value="<?= $classid; ?>">
     <div class="container-fluid mt--6">
       <div class="row" id="myList">
         <!--33-->
         <?php foreach($students as $student){ ?>
         <div class="col-md-3 eachstu">
-          <div class="card attendence">
-            <div class="card-body text-center">
-              <img src="<?= Yii::$app->request->baseUrl.'/img/theme/team-1.jpg' ?>">
+            <div class="card attendence">
+                <div class="card-body text-center">
+                    <img src="<?= Yii::$app->request->baseUrl.'/img/theme/team-1.jpg' ?>">
               <div class="stu-name">
                <?= $student['first_name'].' '.$student['last_name']; ?>
               </div>
@@ -30,11 +32,16 @@
                <?= $student['roll_number']; ?>
               </div>
               <div class="stu-att mt-2">
-                <label>Attendence:</label>
+                <label>Attendance:</label>
                 <label class="switch">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" 
+                      <?php 
+                      echo count($attendance) > 0 ? ($student['attendance_status'] == 1 ? 'checked' : '') : 'checked';
+                      ?>
+                      name="attendance_status[]" value="1">
                   <span class="slider round"></span>
                 </label>
+                <input type="hidden" name="studentid[]" value="<?= $student['id']; ?>">
               </div>
             </div>
           </div>
@@ -42,6 +49,8 @@
         <?php } ?>
       </div>
     </div>
+    <input type="submit" id="saveattendance" value="Submit Attendance" class="btn btn-primary">
+    </form>
     <!--2-->
     
   <script src="../assets/js/argon.js?v=1.2.0"></script>

@@ -833,8 +833,75 @@ class SchoolController extends GoController
     }
     public function actionClassattendance(){
         extract($_POST);
-        $sql = 'select * from students where student_class=\''.$id.'\'';
+        $sql = 'select s.*,a.attendance_status,a.attendance_date
+                from students s
+                left join attendance a on a.student_id=s.id and a.attendance_date=\''.date('Y-m-d').'\'
+                where s.student_class=\''.$id.'\'
+                and  s.school_id=\''.Yii::$app->user->identity->school_id.'\'';
         $students = Yii::$app->db->createCommand($sql)->queryAll();
-        return $this->render('classAttendance',['students'=>$students]);
+        $attendance = \app\models\Attendance::find()
+				->where(['class_id' => $id])
+				->andWhere(['school_id'=>Yii::$app->user->identity->school_id])
+                                ->andWhere(['attendance_date'=>date('Y-m-d')])
+				->all();
+        return $this->render('classAttendance',['students'=>$students,'classid'=>$id,'attendance'=>$attendance]);
     }
+    public function actionSaveattendance(){
+        extract($_POST);
+        $atendanceDet = $attendance = \app\models\Attendance::find()
+				->where(['class_id' => $classid])
+				->andWhere(['school_id'=>Yii::$app->user->identity->school_id])
+                                ->andWhere(['attendance_date'=>date('Y-m-d')])
+				->all();
+        if(count($atendanceDet) > 0){
+            /*
+             * Attendance records exist for date
+             *Updating Attendance data 
+             */
+             for($i=0;$i<count($studentid);$i++){
+                $update = 'update attendance set
+                    attendance_status='.(isset($attendance_status[$i]) && !empty($attendance_status[$i]) ? $attendance_status[$i] : 2).', 
+                    updated_on=\''.date('Y-m-d').'\', updated_by=\''.Yii::$app->user->identity->first_name.'\'
+                    where attendance_date=\''.date('Y-m-d').'\'
+                    and class_id=\''.$classid.'\' and student_id=\''.$studentid[$i].'\'
+                    and school_id=\''.Yii::$app->user->identity->school_id.'\'';
+                $resUpdate = Yii::$app->db->createCommand($update)->execute();
+             }
+             Yii::$app->getSession()->setFlash('success', [
+                'title' => 'Attendance',
+                'text' => 'Attendance Updated Successfully',
+                'type' => 'success',
+                'timer' => 3000,
+                'showConfirmButton' => false
+            ]);
+            
+        } else {
+             
+            /*
+             * No Attendance data found for date
+             */
+            for($i=0;$i<count($studentid);$i++){
+                $data[] = [
+                    $studentid[$i],
+                    (isset($attendance_status[$i]) && !empty($attendance_status[$i])) ? $attendance_status[$i] : 2,
+                    date('Y-m-d'),$classid,Yii::$app->user->identity->school_id
+                    ,date('Y-m-d h:i:s A'),Yii::$app->user->identity->first_name
+                    ,date('Y-m-d h:i:s A'),Yii::$app->user->identity->first_name
+                ];
+            }
+            Yii::$app->db->createCommand()
+                ->batchInsert('attendance', ['student_id','attendance_status','attendance_date'
+                ,'class_id', 'school_id', 'created_on', 'created_by', 'updated_on', 'updated_by'],$data)
+                ->execute();
+            Yii::$app->getSession()->setFlash('success', [
+                'title' => 'Attendance',
+                'text' => 'Attendance added Successfully',
+                'type' => 'success',
+                'timer' => 3000,
+                'showConfirmButton' => false
+            ]);
+        }
+        return $this->redirect('mainattendance');
+    }
+    
 }
