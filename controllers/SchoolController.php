@@ -860,7 +860,7 @@ class SchoolController extends GoController
              */
              for($i=0;$i<count($studentid);$i++){
                 $update = 'update attendance set
-                    attendance_status='.(isset($attendance_status[$i]) && !empty($attendance_status[$i]) ? $attendance_status[$i] : 2).', 
+                    attendance_status='.$attendance_status_hidden[$i].', 
                     updated_on=\''.date('Y-m-d').'\', updated_by=\''.Yii::$app->user->identity->first_name.'\'
                     where attendance_date=\''.date('Y-m-d').'\'
                     and class_id=\''.$classid.'\' and student_id=\''.$studentid[$i].'\'
@@ -882,8 +882,7 @@ class SchoolController extends GoController
              */
             for($i=0;$i<count($studentid);$i++){
                 $data[] = [
-                    $studentid[$i],
-                    (isset($attendance_status[$i]) && !empty($attendance_status[$i])) ? $attendance_status[$i] : 2,
+                    $studentid[$i], $attendance_status_hidden[$i], 
                     date('Y-m-d'),$classid,Yii::$app->user->identity->school_id
                     ,date('Y-m-d h:i:s A'),Yii::$app->user->identity->first_name
                     ,date('Y-m-d h:i:s A'),Yii::$app->user->identity->first_name

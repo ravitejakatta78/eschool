@@ -34,7 +34,7 @@
               <div class="stu-att mt-2">
                 <label>Attendance:</label>
                 <label class="switch">
-                  <input type="checkbox" 
+                  <input type="checkbox" id="student_attendance_<?= $student['id']; ?>" onclick="setAttendance('<?= $student['id']; ?>')"
                       <?php 
                       echo count($attendance) > 0 ? ($student['attendance_status'] == 1 ? 'checked' : '') : 'checked';
                       ?>
@@ -42,6 +42,8 @@
                   <span class="slider round"></span>
                 </label>
                 <input type="hidden" name="studentid[]" value="<?= $student['id']; ?>">
+                <input type="hidden" id="student_attendance_hidden_<?= $student['id']; ?>" name="attendance_status_hidden[]" 
+                value="<?php echo count($attendance) > 0 ? ($student['attendance_status'] == 1 ? '1' : '2') : '1'; ?>">
               </div>
             </div>
           </div>
@@ -64,5 +66,13 @@
     });
   });
 });
+function setAttendance(student_id){
+    if ($('#student_attendance_'+student_id).is(":checked")){
+        $('#student_attendance_hidden_'+student_id).val('1');
+    } else {
+        $('#student_attendance_hidden_'+student_id).val('2');
+    }
+    
+}
   </script>
   
