@@ -12,6 +12,7 @@ use \app\models\Classes;
 use \app\models\Exams;
 use \app\models\ExamDetails;
 use \app\models\SchoolFee;
+use \app\models\NoticeBoard;
 
 class SchoolController extends GoController
 {
@@ -796,16 +797,19 @@ class SchoolController extends GoController
     }
     public function actionNoticeboard()
     {
-        $noticeModel = new Noticeboard;
-        $sql_fee_list = 'select * from notice_board nb
+        $noticeModel = new NoticeBoard;
+        $sql_notice_list = 'select * from notice_board nb
         where notice_status = \''.MyConst::_ACTIVE.'\' 
-        and school_id = \''.Yii::$app->user->identity->school_id.'\' order by crearted_on desc';
-        $fee_list = Yii::$app->db->createCommand($sql_fee_list)->queryAll();
+        and school_id = \''.Yii::$app->user->identity->school_id.'\' order by created_on desc';
+        $notice_list = Yii::$app->db->createCommand($sql_notice_list)->queryAll();
         $connection = \Yii::$app->db;	
 		$transaction = $connection->beginTransaction();
         try {
             if ($noticeModel->load(Yii::$app->request->post()) ) {
+                $notice_arr = Yii::$app->request->post('NoticeBoard');
                 $noticeModel->school_id = Yii::$app->user->identity->school_id;
+                $noticeModel->notice_start_date = date('Y-m-d',strtotime($notice_arr['notice_start_date']));
+                $noticeModel->notice_end_date = date('Y-m-d',strtotime($notice_arr['notice_end_date']));
                 $noticeModel->notice_status = MyConst::_ACTIVE;
                 $noticeModel->created_by = Yii::$app->user->identity->first_name;
                 $noticeModel->created_on = date('Y-m-d h:i:s A');
@@ -820,7 +824,7 @@ class SchoolController extends GoController
                         'timer' => 3000,
                         'showConfirmButton' => false
                     ]);
-                    $feeModel->save();
+                    $noticeModel->save();
                     $transaction->commit();
                     return	$this->redirect('noticeboard');
                 }
@@ -902,5 +906,41 @@ class SchoolController extends GoController
         }
         return $this->redirect('mainattendance');
     }
-    
+    public function actionEditnoticepopup()
+    {
+        extract($_POST);
+        $noticeModel = NoticeBoard::findOne($id);
+        return $this->renderAjax('editnotice', ['noticeModel' => $noticeModel]);   
+
+    }
+    public function actionEditnotice()
+    {
+            $model = new NoticeBoard;
+            if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ActiveForm::validate($model);
+            }
+            $notice_arr = Yii::$app->request->post('NoticeBoard');
+            $notice_update = NoticeBoard::findOne($_POST['NoticeBoard']['id']);
+            $notice_update->attributes = \Yii::$app->request->post('NoticeBoard');
+            $notice_update->notice_start_date = date('Y-m-d',strtotime($notice_arr['notice_start_date']));
+            $notice_update->notice_end_date = date('Y-m-d',strtotime($notice_arr['notice_end_date']));
+            $notice_update->updated_by = Yii::$app->user->identity->first_name;
+            $notice_update->updated_on = date('Y-m-d h:i:s A');   
+            if($notice_update->validate()){
+                $notice_update->save();
+                Yii::$app->getSession()->setFlash('success', [
+            'title' => 'Notice',
+            'text' => 'Notice Updated Successfully',
+            'type' => 'success',
+            'timer' => 3000,
+            'showConfirmButton' => false
+        ]);
+            }
+                return $this->redirect('noticeboard');
+    }
+    public function actionAttendanceview()
+    {
+        return $this->render('attendanceview');
+    }    
 }

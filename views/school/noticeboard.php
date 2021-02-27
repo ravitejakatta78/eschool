@@ -3,6 +3,8 @@
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use aryelds\sweetalert\SweetAlert;
+use \app\helpers\Utility;
+use \app\helpers\MyConst;
 
 ?>
 <?php 
@@ -60,9 +62,9 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
                 for($i=0;$i < $noticecount ; $i++ ){ ?> 
                 <tr>
                     <td><?= ($i+1) ;?></td>
-                    <td><?= $notice_list[$i]['notice_content'];?></td>
-                    <td><?= $notice_list[$i]['notice_start_date'];?></td>
-                    <td><?= $notice_list[$i]['notice_end_date'];?></td>
+                    <td><?= $notice_list[$i]['notice_text'];?></td>
+                    <td><?= Utility::format_date($notice_list[$i]['notice_start_date'],MyConst::_D_M_Y);?></td>
+                    <td><?= Utility::format_date($notice_list[$i]['notice_end_date'],MyConst::_D_M_Y);?></td>
                     <td class="icons"><a onclick="editnoticepopup('<?= $notice_list[$i]['id'];?>')"><span class="fa fa-pencil"></span></a> 
                     	</td>
                 </tr>
@@ -108,7 +110,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
          <div class = "form-group row">
             <label for = "firstname" class = "col-sm-3 control-label">Notice :</label>
             <div class = "col-sm-9">
-            <?= $form->field($noticeModel, 'notice_text')->textinput(['class' => 'form-control'
+            <?= $form->field($noticeModel, 'notice_text')->textarea(['rows' => '5', 'class' => 'form-control'
             ,'placeholder'=>'Enter Notice','autocomplete' => 'off'])->label(false); ?>
             </div>
          </div>
@@ -134,7 +136,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
 
       <!-- Modal footer -->
       <div class="modal-footer">
-      <?= Html::submitButton('Add Subject', ['class'=> 'btn btn-primary', 'id' => 'save' ]); ?>
+      <?= Html::submitButton('Add Notice', ['class'=> 'btn btn-primary', 'id' => 'save' ]); ?>
       <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
       </div>
 
@@ -149,7 +151,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
     <div class="modal-content">
         <!-- Modal Header -->
         <div class="modal-header">
-          <h4 class="modal-title">Edit Subject</h4>
+          <h4 class="modal-title">Edit Notice</h4>
           <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
 	    <div  id="editnoticebody" class="modal-body">
@@ -166,6 +168,8 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
 <script>
 
     $(document).ready(function() {
+      window.onbeforeunload = function() { return "Your work will be lost."; };
+    
     var table = $('#example').DataTable( {
         lengthChange: false,
          //buttons: [ 'copy', 'excel', 'pdf' ]
@@ -188,7 +192,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
 } );
 
 
-function editsubjectpopup(id)
+function editnoticepopup(id)
 {
 var request = $.ajax({
   url: "editnoticepopup",

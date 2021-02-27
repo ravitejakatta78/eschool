@@ -38,8 +38,11 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
         <div class="col">
           <div class="card">
             <!-- Card header -->
-            <div class="card-header border-0">
-              <h3 class="mb-0">Attendance List</h3>
+            <div class="card-header border-0 row">
+              <h3 class="mb-0 col-md-8">Attendance List</h3>
+              <div class="col-md-4 text-right">
+              <input type="text" class="form-control dateselect" value="<?= date('d-M-Y'); ?>">
+              </div>
             </div>
             <!-- Light table -->
             <div class="table-responsive">

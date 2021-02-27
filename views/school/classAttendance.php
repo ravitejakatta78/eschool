@@ -50,8 +50,13 @@
         </div>
         <?php } ?>
       </div>
+      <div class="row">
+      <div class="col-md-12 text-center">
+      <input type="submit" id="saveattendance" value="Submit Attendance" class="btn btn-primary">
+      </div>
+      </div>
     </div>
-    <input type="submit" id="saveattendance" value="Submit Attendance" class="btn btn-primary">
+    
     </form>
     <!--2-->
     
