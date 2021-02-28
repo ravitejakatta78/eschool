@@ -26,7 +26,7 @@ class AppAsset extends AssetBundle
         'css/argon.css?v=1.2.0',
         'css/dataTables.bootstrap4.min.css',
         'css/buttons.bootstrap4.min.css',
-        'cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.css',
+        'css/bootstrap-datepicker.css',
 		'css/custom.css',
     ];
     public $js = [

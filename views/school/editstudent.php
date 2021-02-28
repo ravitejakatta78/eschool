@@ -2,14 +2,16 @@
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use \app\helpers\MyConst;
+use app\helpers\MyConst;
+use app\helpers\Utility;
+
 ?>
       <?php	$form = ActiveForm::begin([
             'id' => 'update-student-form',
             'action' => 'editstudent',
-		'options' => ['class' => 'form-horizontal','wrapper' => 'col-xs-12',],
+		    'options' => ['class' => 'form-horizontal','enctype' => 'multipart/form-data','wrapper' => 'col-xs-12',],
         	'layout' => 'horizontal',
-			 'fieldConfig' => [
+            'fieldConfig' => [
         'horizontalCssClasses' => [
             
             'offset' => 'col-sm-offset-0',
@@ -119,8 +121,8 @@ use \app\helpers\MyConst;
             <div class = "form-group row">
                 <label for = "firstname" class = "col-sm-3 control-label">Data of birth :</label>
                 <div class = "col-sm-9">
-                <?= $form->field($studentModel, 'dob')->textinput(['class' => 'form-control'
-                ,'placeholder'=>'Enter Date Of Birth','autocomplete' => 'off'])->label(false); ?>            
+                <?= $form->field($studentModel, 'dob')->textinput(['class' => 'form-control dateselectedit'
+                ,'placeholder'=>'Enter Date Of Birth','value' => Utility::format_date($studentModel->dob,MyConst::_D_M_Y),'autocomplete' => 'off'])->label(false); ?>            
                 </div>
             </div>            
 
@@ -153,7 +155,7 @@ use \app\helpers\MyConst;
 			<div class = "form-group row">
                 <label for = "firstname" class = "col-sm-3 control-label">Student Image :</label>
                 <div class = "col-sm-9">
-                <?= $form->field($studentModel, 'student_img')->textinput(['class' => 'form-control','placeholder'=>'Enter Student Image'])->label(false); ?>
+                <?= $form->field($studentModel, 'student_img')->fileInput(['class' => 'form-control','accept'=>'image/*'])->label(false); ?>
                 </div>
             </div>
 			
@@ -199,14 +201,12 @@ $this->registerJs($script);
    
    <script>
 $(document).ready(function(){
-// Add button Delete in row
-$('#tblAddRows tbody tr')
-    .find('td')
-    //.append('<input type="button" value="Delete" class="del"/>')
-    .parent() //traversing to 'tr' Element
-    .append('<td><a href="#" class="delrow" ><i class="fa fa-trash border-red text-red deleterow" name="deleterow" ></i></a></td>');
-	
 
+    $('.dateselectedit').datepicker({
+		format: 'dd-M-yyyy',
+    autoclose: true,
+		// startDate: '-3d'
+	});
 	
 });
 

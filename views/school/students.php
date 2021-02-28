@@ -50,6 +50,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
                 <tr>
                     <th scope="col" class="sort" data-sort="name">ID</th>
                     <th scope="col" class="sort" data-sort="name">Student Name</th>
+                    <th scope="col" class="sort" data-sort="name">Class</th>
                     <th scope="col" class="sort" data-sort="name">Parent Name</th>
                     <th scope="col" class="sort" data-sort="budget">Address</th>
                     <th scope="col" class="sort" data-sort="status">Email</th>
@@ -64,6 +65,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
                 <tr>
                     <td><?= ($i+1) ;?></td>
                     <td><?= $student_list[$i]['first_name'].' '.$student_list[$i]['last_name'];?></td>
+                    <td><?= $student_list[$i]['class_name']; ?></td>
                     <td><?= $student_list[$i]['parent_name']; ?></td>
                     <td><?= $student_list[$i]['address'] ;?></td>
                     <td><?= $student_list[$i]['email'] ;?></td>
@@ -94,7 +96,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
       </div>
       <?php	$form = ActiveForm::begin([
     		'id' => 'student-form',
-		'options' => ['class' => 'form-horizontal','wrapper' => 'col-xs-12',],
+		'options' => ['class' => 'form-horizontal','enctype' => 'multipart/form-data','wrapper' => 'col-xs-12',],
         	'layout' => 'horizontal',
 			 'fieldConfig' => [
         'horizontalCssClasses' => [
@@ -237,7 +239,7 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
 			<div class = "form-group row">
                 <label for = "firstname" class = "col-sm-3 control-label">Student Image :</label>
                 <div class = "col-sm-9">
-                <?= $form->field($studentModel, 'student_img')->textinput(['class' => 'form-control','placeholder'=>'Enter Student Image'])->label(false); ?>
+                <?= $form->field($studentModel, 'student_img')->fileInput(['class' => 'form-control','accept'=>'image/*'])->label(false); ?>
                 </div>
             </div>
 			
@@ -324,6 +326,8 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
  
     table.buttons().container()
         .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+   
 } );
 
 

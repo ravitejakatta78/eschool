@@ -50,7 +50,8 @@ class Students extends \yii\db\ActiveRecord
             [['school_id', 'role_id', 'status', 'gender', 'religion', 'student_class', 'student_section', 'parent_id'], 'integer'],
             [['dob', 'created_on', 'updated_on', 'reg_date'], 'safe'],
             [['address'], 'string'],
-            [['first_name', 'last_name', 'student_img'], 'string', 'max' => 255],
+            [['student_img'], 'file', 'extensions' => 'png, jpg, jpeg'],
+            [['first_name', 'last_name'], 'string', 'max' => 255],
             [['roll_number', 'created_by', 'updated_by'], 'string', 'max' => 100],
             [['blood_group', 'admission_id'], 'string', 'max' => 50],
         ];

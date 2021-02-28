@@ -11,6 +11,7 @@ use Yii;
  * @property int|null $student_id
  * @property int|null $attendance_status
  * @property int|null $class_id
+ * @property int|null $section_id
  * @property int|null $school_id
  * @property string $created_on
  * @property string|null $created_by
@@ -34,7 +35,7 @@ class Attendance extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['student_id', 'attendance_status', 'class_id', 'school_id'], 'integer'],
+            [['student_id', 'attendance_status', 'class_id', 'section_id', 'school_id'], 'integer'],
             [['created_on', 'updated_on', 'attendance_date'], 'safe'],
             [['created_by', 'updated_by'], 'string', 'max' => 100],
         ];
@@ -50,6 +51,7 @@ class Attendance extends \yii\db\ActiveRecord
             'student_id' => 'Student ID',
             'attendance_status' => 'Attendance Status',
             'class_id' => 'Class ID',
+            'section_id' => 'Section ID',
             'school_id' => 'School ID',
             'created_on' => 'Created On',
             'created_by' => 'Created By',

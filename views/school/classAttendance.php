@@ -3,7 +3,8 @@
         <div class="header-body">
           <div class="row align-items-center py-4">
             <div class="col-lg-10 col-7">
-              <h6 class="h2 text-white d-inline-block mb-0">Students Attendence - 9th class</h6>
+              <h6 class="h2 text-white d-inline-block mb-0">Students Attendence - <?= $classDet['class_name'] ?> 
+              ( <?= $attendance_date; ?> ) </h6>
               
             </div>
             <div class="col-lg-2 col-5 text-right">
@@ -17,6 +18,9 @@
     <!--1-->
     <form method="post" action="saveattendance">
         <input type="hidden" name="classid" value="<?= $classid; ?>">
+        <input type="hidden" name="attendance_date" value="<?= $attendance_date; ?>">
+        <input type="hidden" name="section_id" value="<?= $section_id; ?>">
+        
     <div class="container-fluid mt--6">
       <div class="row" id="myList">
         <!--33-->
@@ -24,7 +28,16 @@
         <div class="col-md-3 eachstu">
             <div class="card attendence">
                 <div class="card-body text-center">
-                    <img src="<?= Yii::$app->request->baseUrl.'/img/theme/team-1.jpg' ?>">
+                <?php 
+                $filepath = 'uploads/'.Yii::$app->user->identity->school_id.'/student_images/'.$student['student_img'];
+                $imagePath =  '../../'.\yii\helpers\Url::to(['/'.$filepath. $student['student_img']]);
+                if(!file_exists($imagePath)){
+                ?>
+                    <img src="<?= Yii::$app->request->baseUrl.'/'.$filepath ?>">
+                <?php }
+                else { ?>
+                    <img src="<?= Yii::$app->request->baseUrl.'/img/defaultprofilepic.png' ?>">
+                <?php } ?>    
               <div class="stu-name">
                <?= $student['first_name'].' '.$student['last_name']; ?>
               </div>

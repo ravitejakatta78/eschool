@@ -47,3 +47,5 @@ CREATE TABLE `notice_board` (
 	`updated_by` VARCHAR(100) NULL ,
 	PRIMARY KEY (`id`)
 ) ENGINE = InnoDB;
+
+ALTER TABLE `attendance` ADD `section_id` INT(11) NULL DEFAULT NULL AFTER `class_id`;

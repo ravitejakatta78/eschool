@@ -18,4 +18,15 @@ $(document).ready(function() {
 	   
   });
    
-  
+ function getSections()
+ {
+	let class_id = $("#class_id").val();
+	var request = $.ajax({
+		url: "sectionslist",
+		type: "POST",
+		data: {id : class_id},
+	  }).done(function(msg) {
+		  $('#section_id').html(msg);
+
+	  });		 
+ }

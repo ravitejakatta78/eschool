@@ -76,12 +76,30 @@ use yii\helpers\Url;
                 <span class="nav-link-text">Subjects</span>
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="<?= Url::to(['school/mainattendance']); ?>">
-                <i class="ni ni-send text-dark"></i>
+
+
+            <li class="nav-item dropdown" role="presentation">
+              <a class="nav-link" lass="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                <i class="ni ni-tv-2 text-primary"></i>
                 <span class="nav-link-text">Attendance</span>
+                <span class="caret"></span>
               </a>
+              <ul  class="dropdown-menu">
+                <li class="nav-item ">
+                  <a class="nav-link" href="<?= Url::to(['school/mainattendance']); ?>">
+                    <i class="ni ni-tv-2 text-primary"></i>
+                    <span class="nav-link-text">Attendance</span>
+                  </a>
+                </li>
+                <li  class="nav-item ">
+                  <a class="nav-link" href="<?= Url::to(['school/attendanceview']); ?>">
+                    <i class="ni ni-tv-2 text-primary"></i>
+                    <span class="nav-link-text">Attendance View</span>
+                  </a>
+                </li>
+              </ul>
             </li>
+
             <li class="nav-item">
               <a class="nav-link" href="<?= Url::to(['school/exams']); ?>">
                 <i class="ni ni-circle-08 text-pink"></i>

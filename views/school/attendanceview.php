@@ -22,71 +22,87 @@ use yii\helpers\Url;
     <div class="container-fluid mt--6">
       <div class="card">
         <div class="card-body">
-          <form class = "form-inline" role = "form">
+          <form class = "form-inline" method="POST" role = "form">
             <div class="row">
               
              <div class = "form-group mr-2">
-                <select class="form-control">
+                <select class="form-control" name="class_id" id="class_id" onchange="getSections()">
                   <option>Select Class</option>
-                  <option>LKG</option>
-                  <option>UKG</option>
+                  <?php for ( $c = 0; $c < count($res_classes); $c++ ) { ?> 
+                  <option value="<?= $res_classes[$c]['id']; ?>" <?php if($res_classes[$c]['id'] == $class_id) { echo 'selected'; } ?> ><?= $res_classes[$c]['class_name']; ?></option>
+                  <?php } ?>
                 </select>
              </div>
              <div class = "form-group mr-2">
-              <select class="form-control">
-                <option>Select Section</option>
-                <option>A</option>
-                <option>B</option>
+              <select id="section_id" name="section_id" class="form-control">
+               <option value="">Select Section</option>
               </select>
            </div>
            <div class = "form-group mr-2">
-            <input type = "text" class = "form-control" placeholder = "Start Date">
+            <input type = "text" class = "form-control dateselect" id="start_date" name="start_date" 
+            value="<?= date('d-M-Y',strtotime($start_date)); ?>">
            </div>
            <div class = "form-group mr-2">
-            <input type = "text" class = "form-control" placeholder = "End Date">
+            <input type = "text" class = "form-control dateselect" id="end_date" name="end_date" 
+            value="<?= date('d-M-Y',strtotime($end_date)); ?>">
            </div>
            <div class = "form-group mr-2">
             <button class="btn-primary btn">Submit</button>
            </div>
             </div>
-            
-            </form>
+          </form>
+          <div class="table-responsive">
+              <table class="table align-items-center table-flush" id="example">
+                <thead class="thead-light">
+                <tr>
+                    <th scope="col" class="sort" data-sort="id">ID</th>
+                    <th scope="col" class="sort" data-sort="name">Student Name</th>
+                    <?php 
+                    function compare($a, $b)
+                    {
+                        return strtotime($a) - strtotime($b);
+                    }
+                    usort($attendance_dates, 'compare');
+                    for($a = 0; $a < count($attendance_dates) ; $a++){ ?> 
+                    <th scope="col" class="sort" data-sort="attendance"><?= date('d-M-Y',strtotime($attendance_dates[$a])) ; ?>
+                    <?php } ?>
+                </tr>
+                </thead>
+                <tbody class="list">
+                <?php 
+                $n = 0;
+                foreach($new_arr as $key => $value) {
+                  $n++;
+                  ?>
+                  <tr>
+                    <td><?= $n; ?></td>
+                    <td><?= $student_arr[$key]; ?></td>
+                    <?php for($s = 0; $s < count($attendance_dates) ; $s++) { ?>
+                      <td><?php if($value[$attendance_dates[$s]] == '1') { ?>
+                      P  
+                      <?php }
+                      else if ($value[$attendance_dates[$s]] == '2') { ?>
+                      A
+                      <?php } ?>
+                      </td>
+                    <?php } ?> 
+                  </tr>
+                <?php } ?>
+                </tbody>
+              </table>
+          </div>
+
         </div>
       </div>
       
-      <!-- Footer -->
-      <footer class="footer pt-0">
-        <div class="row align-items-center justify-content-lg-between">
-          <div class="col-lg-6">
-            <div class="copyright text-center  text-lg-left  text-muted">
-              &copy; 2020 <a href="https://www.creative-tim.com" class="font-weight-bold ml-1" target="_blank">Creative Tim</a>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-              <li class="nav-item">
-                <a href="https://www.creative-tim.com" class="nav-link" target="_blank">Creative Tim</a>
-              </li>
-              <li class="nav-item">
-                <a href="https://www.creative-tim.com/presentation" class="nav-link" target="_blank">About Us</a>
-              </li>
-              <li class="nav-item">
-                <a href="http://blog.creative-tim.com" class="nav-link" target="_blank">Blog</a>
-              </li>
-              <li class="nav-item">
-                <a href="https://github.com/creativetimofficial/argon-dashboard/blob/master/LICENSE.md" class="nav-link" target="_blank">MIT License</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </footer>
+ 
     </div>
   </div>		
 
 
 <script>
 
-    $(document).ready(function() {
+$(document).ready(function() {
     var table = $('#example').DataTable( {
         lengthChange: false,
          //buttons: [ 'copy', 'excel', 'pdf' ]
@@ -94,11 +110,11 @@ use yii\helpers\Url;
           'copy',
             {
                 extend: 'excelHtml5',
-                title: 'Student List'
+                title: 'Attendance List'
             },
             {
                 extend: 'pdfHtml5',
-                title: 'Student List'
+                title: 'Attendance List'
             }
         ]
 
@@ -106,5 +122,7 @@ use yii\helpers\Url;
  
     table.buttons().container()
         .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
+   
 } );
 </script>

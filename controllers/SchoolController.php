@@ -13,6 +13,9 @@ use \app\models\Exams;
 use \app\models\ExamDetails;
 use \app\models\SchoolFee;
 use \app\models\NoticeBoard;
+use yii\web\UploadedFile;
+use \yii\helpers\Url;
+
 
 class SchoolController extends GoController
 {
@@ -24,13 +27,17 @@ class SchoolController extends GoController
     {
         $studentModel = new Students;
         $parentModel = new Parents;
-        $sql_student_list = 'select s.id,first_name,last_name,parent_name,address,email,phone from students s inner join parents p on p.id = s.parent_id 
+        $sql_student_list = 'select s.id,first_name,last_name,parent_name
+        ,address,email,phone,c.class_name 
+        from students s inner join parents p on p.id = s.parent_id
+        left join classes c on c.id = s.student_class 
         where s.school_id = \''.Yii::$app->user->identity->school_id.'\'';
         $student_list = Yii::$app->db->createCommand($sql_student_list)->queryAll();
         $connection = \Yii::$app->db;	
 		$transaction = $connection->beginTransaction();
         try {
             $parent_arr = Yii::$app->request->post('Parents');
+            $student_arr = Yii::$app->request->post('Students');
             $parent_identity = Parents::find()->where(['phone'=> $parent_arr['phone']])->asArray()->One();
             if ($parentModel->load(Yii::$app->request->post()) && empty($parent_identity)) {
                 
@@ -64,6 +71,7 @@ class SchoolController extends GoController
 
             if ($studentModel->load(Yii::$app->request->post()) ) {
                 $studentModel->school_id = Yii::$app->user->identity->school_id;
+                $studentModel->dob = date('Y-m-d',strtotime($student_arr['dob']));
                 $studentModel->role_id = MyConst::_STUDENT;
                 $studentModel->parent_id = $parent_id;
                 $studentModel->status = MyConst::_ACTIVE;
@@ -72,6 +80,17 @@ class SchoolController extends GoController
                 $studentModel->updated_by = Yii::$app->user->identity->first_name;
                 $studentModel->updated_on = date('Y-m-d h:i:s A');
                 $studentModel->reg_date = date('Y-m-d');
+                $image = UploadedFile::getInstance($studentModel, 'student_img');
+                if($image){
+                $folderpath = 'uploads/'.Yii::$app->user->identity->school_id.'/student_images/';
+                    if (!is_dir($folderpath)) {
+                        mkdir($folderpath, 0777, true);
+                    }
+            
+                    $imagename = strtolower(base_convert(time(), 10, 36) . '_' . md5(microtime())).'.'.$image->extension;
+                    $image->saveAs($folderpath . $imagename);
+                    $studentModel->student_img = $imagename;
+                }
                 $studentModel->save();
                 Yii::$app->getSession()->setFlash('success', [
                     'title' => 'Student',
@@ -83,8 +102,6 @@ class SchoolController extends GoController
                 $transaction->commit();
                 return $this->redirect('students');
             }
-                
-
         }
         catch(Exception $e) {
             $transaction->rollback();
@@ -110,9 +127,30 @@ class SchoolController extends GoController
 
         $student_arr = Yii::$app->request->post('Students');
         $students_update = Students::findOne($_POST['Students']['id']);
+        $oldStudentImage = $students_update['student_img'];
         $students_update->attributes = \Yii::$app->request->post('Students');
+        $students_update->dob = date('Y-m-d',strtotime($student_arr['dob']));
         $students_update->updated_by = Yii::$app->user->identity->first_name;
         $students_update->updated_on = date('Y-m-d h:i:s A');   
+
+        $image = UploadedFile::getInstance($studentModel, 'student_img');
+        if($image){
+            $folderpath = 'uploads/'.Yii::$app->user->identity->school_id.'/student_images/';
+            $imagePath =  '../../'.Url::to(['/'.$folderpath. $oldStudentImage]);
+            if(file_exists($imagePath)){
+                unlink($imagePath);	
+            }
+            if (!is_dir($folderpath)) {
+                mkdir($folderpath, 0777, true);
+            }
+            $imagename = strtolower(base_convert(time(), 10, 36) . '_' . md5(microtime())).'.'.$image->extension;
+            $image->saveAs($folderpath.$imagename);
+            $students_update->student_img = $imagename;
+        }else{
+            $students_update->student_image = $oldProductImage;
+        }
+
+        
         if($students_update->validate()){
             $students_update->save();
             $parent_arr = Yii::$app->request->post('Parents');
@@ -604,13 +642,13 @@ class SchoolController extends GoController
 				->all();
 
 		if (!empty($sections)) {
-						echo "<option value=''>Select</option>"; 
+						echo "<option value=''>Select Section</option>"; 
 
 			foreach($sections as $sections) {
 			echo "<option value='".$sections->id."'>".$sections->section_name."</option>";
 			}
 		} else {
-			echo "<option value=''>Select</option>";
+			echo "<option value=''>Select Section</option>";
 		}
 		
     }
@@ -783,12 +821,12 @@ class SchoolController extends GoController
     }
     public function actionMainattendance()
     {
-        $class_list = Classes::find()
-        ->where(['status' => MyConst::_ACTIVE,'school_id' => Yii::$app->user->identity->school_id])
-        ->orderBy([
-            'id'=>SORT_DESC
-        ])
-        ->asArray()->all();
+        
+        $sql_class_list = 'select c.*,cs.section_name,cs.id as section_id from classes c left join class_sections cs 
+        on c.id = cs.class_id and cs.section_status = \''.MyConst::_ACTIVE.'\' 
+        where c.status = \''.MyConst::_ACTIVE.'\' 
+        and c.school_id = \''.Yii::$app->user->identity->school_id.'\'';
+        $class_list = Yii::$app->db->createCommand($sql_class_list)->queryAll();
         return $this->render('mainattendance', ['class_list' => $class_list]);
     }
     public function actionAdmindashboard()
@@ -839,23 +877,29 @@ class SchoolController extends GoController
         extract($_POST);
         $sql = 'select s.*,a.attendance_status,a.attendance_date
                 from students s
-                left join attendance a on a.student_id=s.id and a.attendance_date=\''.date('Y-m-d').'\'
-                where s.student_class=\''.$id.'\'
-                and  s.school_id=\''.Yii::$app->user->identity->school_id.'\'';
+                left join attendance a on a.student_id=s.id and a.attendance_date=\''.date('Y-m-d',strtotime($attendance_date)).'\'
+                where s.student_class=\''.$id.'\' ';
+                if(!empty($section_id)){
+                    $sql .= ' and student_section = \''.$section_id.'\' ';
+                }
+                 
+                $sql .= ' and  s.school_id=\''.Yii::$app->user->identity->school_id.'\'';
         $students = Yii::$app->db->createCommand($sql)->queryAll();
         $attendance = \app\models\Attendance::find()
 				->where(['class_id' => $id])
 				->andWhere(['school_id'=>Yii::$app->user->identity->school_id])
-                                ->andWhere(['attendance_date'=>date('Y-m-d')])
+                                ->andWhere(['attendance_date'=> date('Y-m-d',strtotime($attendance_date))])
 				->all();
-        return $this->render('classAttendance',['students'=>$students,'classid'=>$id,'attendance'=>$attendance]);
+        $classDet = Classes::findOne($id);         
+        return $this->render('classAttendance',['students'=>$students,'classid'=>$id
+        ,'attendance'=>$attendance,'classDet' => $classDet,'section_id' => $section_id, 'attendance_date' => $attendance_date]);
     }
     public function actionSaveattendance(){
         extract($_POST);
         $atendanceDet = $attendance = \app\models\Attendance::find()
 				->where(['class_id' => $classid])
 				->andWhere(['school_id'=>Yii::$app->user->identity->school_id])
-                                ->andWhere(['attendance_date'=>date('Y-m-d')])
+                                ->andWhere(['attendance_date'=> date('Y-m-d',strtotime($attendance_date))])
 				->all();
         if(count($atendanceDet) > 0){
             /*
@@ -866,8 +910,8 @@ class SchoolController extends GoController
                 $update = 'update attendance set
                     attendance_status='.$attendance_status_hidden[$i].', 
                     updated_on=\''.date('Y-m-d').'\', updated_by=\''.Yii::$app->user->identity->first_name.'\'
-                    where attendance_date=\''.date('Y-m-d').'\'
-                    and class_id=\''.$classid.'\' and student_id=\''.$studentid[$i].'\'
+                    where attendance_date=\''.date('Y-m-d',strtotime($attendance_date)).'\'
+                    and class_id=\''.$classid.'\'  and section_id = \''.$section_id.'\' and student_id=\''.$studentid[$i].'\'
                     and school_id=\''.Yii::$app->user->identity->school_id.'\'';
                 $resUpdate = Yii::$app->db->createCommand($update)->execute();
              }
@@ -887,14 +931,14 @@ class SchoolController extends GoController
             for($i=0;$i<count($studentid);$i++){
                 $data[] = [
                     $studentid[$i], $attendance_status_hidden[$i], 
-                    date('Y-m-d'),$classid,Yii::$app->user->identity->school_id
+                    date('Y-m-d',strtotime($attendance_date)),$classid,$section_id,Yii::$app->user->identity->school_id
                     ,date('Y-m-d h:i:s A'),Yii::$app->user->identity->first_name
                     ,date('Y-m-d h:i:s A'),Yii::$app->user->identity->first_name
                 ];
             }
             Yii::$app->db->createCommand()
                 ->batchInsert('attendance', ['student_id','attendance_status','attendance_date'
-                ,'class_id', 'school_id', 'created_on', 'created_by', 'updated_on', 'updated_by'],$data)
+                ,'class_id','section_id', 'school_id', 'created_on', 'created_by', 'updated_on', 'updated_by'],$data)
                 ->execute();
             Yii::$app->getSession()->setFlash('success', [
                 'title' => 'Attendance',
@@ -941,6 +985,46 @@ class SchoolController extends GoController
     }
     public function actionAttendanceview()
     {
-        return $this->render('attendanceview');
-    }    
+        extract($_POST);
+        $attendance_dates = [];
+        $new_arr = []; 
+        $class_arr = [];
+        $student_arr = [];
+        $class_id = $class_id ?? null;
+        $sql_classes = 'select id,class_name from classes c where school_id = \''.Yii::$app->user->identity->school_id.'\'
+        and  c.status = \''.MyConst::_ACTIVE.'\'';
+        $res_classes = Yii::$app->db->createCommand($sql_classes)->queryAll();
+        $start_date = isset($start_date) ? date('Y-m-d',strtotime($start_date)) : date('Y-m-d');
+        $end_date =  isset($end_date) ? date('Y-m-d',strtotime($end_date)) : date('Y-m-d');
+
+        if (isset($class_id)) {
+            $class_list = Classes::findOne($class_id);
+            $class_arr = array_column((array)$class_list,'class_name','id');
+            $sql_student_list = 'select id, concat(first_name,last_name) first_name 
+            from students
+            where school_id =  \''.Yii::$app->user->identity->school_id.'\' 
+            and student_class = \''.$class_id.'\'';
+            $student_list = Yii::$app->db->createCommand($sql_student_list)->queryAll();
+
+            $student_arr =  array_column((array)$student_list,'first_name','id');
+            $sql_attendance = 'select * from attendance where attendance_date between \''.$start_date.'\' 
+            and \''.$end_date.'\' and class_id = \''.$class_id.'\' ';
+            if(!empty($section_id)){
+                $sql_attendance .= ' and section_id =\''.$section_id.'\' ';
+            }
+            $res_attendance = Yii::$app->db->createCommand($sql_attendance)->queryAll();
+            if(!empty($res_attendance)) {
+                $attendance_dates = (array_values(array_unique(array_column($res_attendance,'attendance_date'))));
+                for($i=0;$i<count($res_attendance);$i++)
+                {
+                    $new_arr[$res_attendance[$i]['student_id']][$res_attendance[$i]['attendance_date']] = $res_attendance[$i]['attendance_status']; 
+                }
+               
+            }
+        }
+        return $this->render('attendanceview', ['res_classes' => $res_classes, 'start_date' => $start_date
+                            ,'end_date' => $end_date,'attendance_dates' => $attendance_dates
+                            ,'class_arr' => $class_arr , 'new_arr' => $new_arr
+                            , 'student_arr' => $student_arr,'class_id' =>$class_id] );
+    }
 }

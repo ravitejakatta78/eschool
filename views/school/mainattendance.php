@@ -41,9 +41,12 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
             <div class="card-header border-0 row">
               <h3 class="mb-0 col-md-8">Attendance List</h3>
               <div class="col-md-4 text-right">
-              <input type="text" class="form-control dateselect" value="<?= date('d-M-Y'); ?>">
+              <input type="text" class="form-control dateselect" id="attendance_date" value="<?= date('d-M-Y'); ?>">
               </div>
             </div>
+            <?php
+            $section_id_arr = array_filter(array_column($class_list,'section_id'));
+            ?>
             <!-- Light table -->
             <div class="table-responsive">
               <table class="table align-items-center table-flush" id="example">
@@ -51,7 +54,9 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
                 <tr>
                     <th scope="col" class="sort" data-sort="namid">ID</th>
                     <th scope="col" class="sort" data-sort="name">Class Name</th>
-                    <th scope="col" class="sort" data-sort="completion">Action</th>
+                    <?php if(!empty($section_id_arr)){ ?>
+                      <th scope="col" class="sort" data-sort="name">Section Name</th>
+                    <?php } ?>
                     <th scope="col" class="sort" data-sort="completion">Attendance</th>
                 </tr>
                 </thead>
@@ -62,10 +67,11 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
                 <tr>
                     <td><?= ($i+1) ;?></td>
                     <td><?= $class_list[$i]['class_name'];?></td>
-                    <td class="icons"><a onclick="editclasspopup('<?= $class_list[$i]['id'];?>')"><span class="fa fa-pencil"></span></a> 
-                    </td>
+                    <?php if(!empty($section_id_arr)) { ?>
+                    <td><?= $class_list[$i]['section_name'];?></td>
+                    <?php } ?>
                     <td>
-                        <a href="#" class="btn btn-primary" onclick="getClassAttendance('<?= $class_list[$i]['id']; ?>')" >Attendance</a>
+                        <a class="btn btn-primary" onclick="getClassAttendance('<?= $class_list[$i]['id']; ?>','<?= $class_list[$i]['section_id']; ?>')" >Attendance</a>
                     </td>
                 </tr>
                 <?php } ?>
@@ -81,7 +87,8 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
     $(document).ready(function() { 
         
     });
-    function getClassAttendance(id){
+    function getClassAttendance(id,section_id){
+        let attendance_date = $("#attendance_date").val();
         var form=document.createElement('form');
         form.setAttribute('method','post');
         form.setAttribute('action','classattendance');
@@ -92,6 +99,21 @@ foreach (Yii::$app->session->getAllFlashes() as $message) {
         hiddenField.setAttribute("type", "hidden");
         hiddenField.setAttribute("value", id);
         form.appendChild(hiddenField);
+       
+        
+        var hiddenField = document.createElement("input");
+        hiddenField.setAttribute("name", "section_id");
+        hiddenField.setAttribute("type", "hidden");
+        hiddenField.setAttribute("value", section_id);
+        form.appendChild(hiddenField);
+
+        var hiddenField = document.createElement("input");
+        hiddenField.setAttribute("name", "attendance_date");
+        hiddenField.setAttribute("type", "hidden");
+        hiddenField.setAttribute("value", attendance_date);
+        form.appendChild(hiddenField);
+
+        
 
         document.body.appendChild(form);
         form.submit();    
