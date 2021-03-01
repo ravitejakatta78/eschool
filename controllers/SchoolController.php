@@ -13,6 +13,7 @@ use \app\models\Exams;
 use \app\models\ExamDetails;
 use \app\models\SchoolFee;
 use \app\models\NoticeBoard;
+use app\models\StudentPaidFee;
 use yii\web\UploadedFile;
 use \yii\helpers\Url;
 
@@ -1026,5 +1027,44 @@ class SchoolController extends GoController
                             ,'end_date' => $end_date,'attendance_dates' => $attendance_dates
                             ,'class_arr' => $class_arr , 'new_arr' => $new_arr
                             , 'student_arr' => $student_arr,'class_id' =>$class_id] );
+    }
+    public function actionStudentwisefee(){
+        $feeModel = new StudentPaidFee;
+        $sql_fee_paid = 'select class_name, s.first_name, s.last_name,sf.* from student_paid_fee sf
+            inner join classes c on c.id = sf.class_id
+            join students s on s.id=sf.student_id
+            where sf.status = \''.MyConst::_ACTIVE.'\'
+            and sf.school_id = \''.Yii::$app->user->identity->school_id.'\'';
+        $fee_paid_details = Yii::$app->db->createCommand($sql_fee_paid)->queryAll();
+        $connection = \Yii::$app->db;	
+		$transaction = $connection->beginTransaction();
+        try {
+            if ($feeModel->load(Yii::$app->request->post()) ) {
+                $feeModel->school_id = Yii::$app->user->identity->school_id;
+                $feeModel->status = MyConst::_ACTIVE;
+                $feeModel->paid_date = date('Y-m-d');
+                $feeModel->created_by = Yii::$app->user->identity->first_name;
+                $feeModel->created_on = date('Y-m-d h:i:s A');
+                $feeModel->updated_by = Yii::$app->user->identity->first_name;
+                $feeModel->updated_on = date('Y-m-d h:i:s A');
+
+                if ($feeModel->validate()) {
+                    Yii::$app->getSession()->setFlash('success', [
+                        'title' => 'Fee',
+                        'text' => 'Fee Paid Successfully',
+                        'type' => 'success',
+                        'timer' => 3000,
+                        'showConfirmButton' => false
+                    ]);
+                    $feeModel->save();
+                    $transaction->commit();
+                    return	$this->redirect('studentwisefee');
+                }
+            }    
+        }
+        catch(Exception $e) {
+            $transaction->rollback();
+        }
+        return $this->render('studentwisefee',['feeModel'=>$feeModel,'fee_paid_details'=>$fee_paid_details]);
     }
 }

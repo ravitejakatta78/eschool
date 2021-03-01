@@ -106,13 +106,35 @@ use yii\helpers\Url;
                 <span class="nav-link-text">Exam</span>
               </a>
             </li>
-            <li class="nav-item">
+<!--            <li class="nav-item">
               <a class="nav-link" href="<?= Url::to(['school/classwisefee']); ?>">
                 <i class="ni ni-circle-08 text-pink"></i>
                 <span class="nav-link-text">Fee</span>
               </a>
-            </li>            
-
+            </li>            -->
+            <li class="nav-item dropdown" role="presentation">
+              <a class="nav-link" lass="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                <i class="ni ni-tv-2 text-primary"></i>
+                <span class="nav-link-text">Fee</span>
+                <span class="caret"></span>
+              </a>
+              <ul  class="dropdown-menu">
+                <li class="nav-item ">
+                  <a class="nav-link" href="<?= Url::to(['school/classwisefee']); ?>">
+                    <i class="ni ni-tv-2 text-primary"></i>
+                    <span class="nav-link-text">Fee</span>
+                  </a>
+                </li>
+                <li  class="nav-item ">
+                  <a class="nav-link" href="<?= Url::to(['school/studentwisefee']); ?>">
+                    <i class="ni ni-tv-2 text-primary"></i>
+                    <span class="nav-link-text">Fee Details</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            
+            
           </ul>
           <!-- Divider -->
           <hr class="my-3">

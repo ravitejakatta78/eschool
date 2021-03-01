@@ -49,3 +49,27 @@ CREATE TABLE `notice_board` (
 ) ENGINE = InnoDB;
 
 ALTER TABLE `attendance` ADD `section_id` INT(11) NULL DEFAULT NULL AFTER `class_id`;
+
+CREATE TABLE `student_paid_fee` (
+  `id` int(11) NOT NULL,
+  `class_id` int(11) DEFAULT NULL,
+  `section_id` int(11) DEFAULT NULL,
+  `student_id` int(11) DEFAULT NULL,
+  `amount` int(11) DEFAULT NULL,
+  `paid_date` date DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `created_on` timestamp NULL DEFAULT NULL,
+  `created_by` varchar(50) DEFAULT NULL,
+  `updated_on` timestamp NULL DEFAULT NULL,
+  `updated_by` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `student_paid_fee`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `student_paid_fee`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `student_paid_fee` ADD `school_id` INT(11) NULL DEFAULT NULL AFTER `status`; 
+
+
